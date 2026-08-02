@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bắt Chữ — Trò chơi chọn nghĩa từ tiếng Anh</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="sky" aria-hidden="true">
+  <div class="star s1"></div><div class="star s2"></div><div class="star s3"></div>
+  <div class="star s4"></div><div class="star s5"></div><div class="star s6"></div>
+  <div class="star s7"></div><div class="star s8"></div>
+</div>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-glyph">✷</span>
+    <h1>BẮT CHỮ</h1>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button class="tab-btn active" data-tab="play" role="tab" aria-selected="true">Chơi</button>
+    <button class="tab-btn" data-tab="manage" role="tab" aria-selected="false">Soạn câu hỏi</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ================= PLAY TAB ================= -->
+  <section id="tab-play" class="tab-panel active">
+
+    <div id="play-intro" class="intro-card">
+      <p class="eyebrow">Trò chơi chọn nghĩa từ</p>
+      <h2>Từ hiện lên, nghĩa đúng trôi lơ lửng.<br>Chạm trúng — đèn sáng. Chạm trật — thử lại.</h2>
+      <p class="intro-sub">Mỗi câu hỏi có một từ và nhiều đáp án bay quanh khung chơi. Hãy chạm vào đáp án bạn cho là đúng.</p>
+      <button id="btn-start" class="btn-primary">Bắt đầu chơi</button>
+      <p id="no-questions-msg" class="hint hidden">Chưa có câu hỏi nào. Hãy sang tab <strong>Soạn câu hỏi</strong> để tạo trước nhé.</p>
+    </div>
+
+    <div id="game-wrap" class="game-wrap hidden">
+      <div class="game-hud">
+        <span id="progress-label">Câu 1/1</span>
+        <span id="score-label">Điểm: 0</span>
+      </div>
+
+      <div class="word-card">
+        <p class="word-label">Nghĩa của từ</p>
+        <h2 id="word-display">word</h2>
+      </div>
+
+      <div id="arena" class="arena"></div>
+
+      <div id="feedback-banner" class="feedback-banner"></div>
+    </div>
+
+    <div id="game-end" class="intro-card hidden">
+      <p class="eyebrow">Hoàn thành</p>
+      <h2>Bạn đã bắt xong hết chữ!</h2>
+      <p id="final-score" class="intro-sub">Điểm số: 0</p>
+      <button id="btn-replay" class="btn-primary">Chơi lại</button>
+    </div>
+
+  </section>
+
+  <!-- ================= MANAGE TAB ================= -->
+  <section id="tab-manage" class="tab-panel">
+
+    <div class="manage-grid">
+
+      <div class="card form-card">
+        <h3>Thêm câu hỏi mới</h3>
+        <label class="field-label" for="input-word">Từ / nghĩa cần hỏi</label>
+        <input id="input-word" type="text" placeholder="Ví dụ: happy — vui vẻ, hạnh phúc">
+
+        <div class="answers-block">
+          <label class="field-label">Các đáp án (chọn nút tròn cho đáp án đúng)</label>
+          <div id="answers-list"></div>
+          <button id="btn-add-answer" class="btn-ghost" type="button">+ Thêm đáp án</button>
+        </div>
+
+        <div class="form-actions">
+          <button id="btn-save-question" class="btn-primary" type="button">Lưu câu hỏi</button>
+          <span id="form-error" class="form-error"></span>
+        </div>
+      </div>
+
+      <div class="card list-card">
+        <div class="list-card-header">
+          <h3>Danh sách câu hỏi (<span id="q-count">0</span>)</h3>
+          <div class="list-actions">
+            <button id="btn-export" class="btn-ghost" type="button">Xuất JSON</button>
+            <label class="btn-ghost file-btn">
+              Nhập JSON
+              <input id="input-import" type="file" accept="application/json" hidden>
+            </label>
+          </div>
+        </div>
+        <ul id="question-list" class="question-list"></ul>
+        <p id="empty-list-msg" class="hint">Chưa có câu hỏi nào được lưu.</p>
+      </div>
+
+    </div>
+
+  </section>
+
+</main>
+
+<footer>
+  <p>Dữ liệu câu hỏi được lưu ngay trên trình duyệt của bạn (localStorage).</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
