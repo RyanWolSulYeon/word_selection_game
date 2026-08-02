@@ -282,6 +282,12 @@ main {
   animation: shake .38s ease;
 }
 .bubble.disabled { pointer-events: none; opacity: .55; }
+.bubble.bubble-remove {
+  opacity: 0;
+  filter: blur(1px);
+  pointer-events: none;
+  transition: opacity .18s ease, filter .18s ease;
+}
 @keyframes shake {
   0%,100% { transform: translateX(0); }
   20% { transform: translateX(-6px); }

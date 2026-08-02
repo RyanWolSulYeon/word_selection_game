@@ -421,13 +421,19 @@
       }, 850);
     } else {
       playWrong();
-      bubble.el.classList.remove("wrong-shake");
-      // force reflow to restart animation if clicked repeatedly
-      void bubble.el.offsetWidth;
-      bubble.el.classList.add("wrong-shake");
-      feedbackBanner.textContent = "Chưa đúng, thử lại nhé!";
+
+      bubble.locked = true;
+      bubble.el.classList.add("bubble-remove");
+      bubble.el.style.opacity = "0";
+      bubble.el.style.filter = "blur(1px)";
+      bubble.el.style.pointerEvents = "none";
+
+      bubbles = bubbles.filter(function (b) {
+        return b !== bubble;
+      });
+
+      feedbackBanner.textContent = "Chưa đúng, đáp án này đã bị xóa. Thử lại nhé!";
       feedbackBanner.className = "feedback-banner bad";
-      setTimeout(function () { bubble.el.classList.remove("wrong-shake"); }, 400);
     }
   }
 
