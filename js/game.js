@@ -12,6 +12,7 @@ const arena = document.getElementById("arena");
 const wordDisplay = document.getElementById("word-display");
 const progressLabel = document.getElementById("progress-label");
 const scoreLabel = document.getElementById("score-label");
+const timerLabel = document.getElementById("timer-label");
 const feedbackBanner = document.getElementById("feedback-banner");
 const finalScore = document.getElementById("final-score");
 const btnReplay = document.getElementById("btn-replay");
@@ -27,6 +28,51 @@ let rafId = null;
 let bubbles = [];
 let currentFilled = [];
 let lastTs = null;
+
+let timeLeft = 30;
+let timerInterval = null;
+
+function clearTimer() {
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = null;
+}
+
+function updateTimerDisplay() {
+  if (!timerLabel) return;
+  timerLabel.textContent = `⏳ ${timeLeft}s`;
+  if (timeLeft <= 5) {
+    timerLabel.classList.add("warning");
+  } else {
+    timerLabel.classList.remove("warning");
+  }
+}
+
+function startTimer() {
+  clearTimer();
+  timeLeft = 30;
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    timeLeft -= 1;
+    updateTimerDisplay();
+    if (timeLeft <= 0) {
+      handleTimeout();
+    }
+  }, 1000);
+}
+
+function handleTimeout() {
+  clearTimer();
+  playWrong();
+  bubbles.forEach(b => { b.locked = true; b.el.classList.add("disabled"); });
+  feedbackBanner.textContent = "Hết giờ! Chuyển sang câu tiếp theo...";
+  feedbackBanner.className = "feedback-banner bad";
+  
+  setTimeout(() => {
+    qIndex += 1;
+    if (qIndex >= queue.length) endGame();
+    else showQuestion();
+  }, 1500);
+}
 
 export function renderScreenPicker() {
   if(!screenPickerEl) return;
@@ -86,6 +132,7 @@ export function initGame() {
 
   btnBackIntro.addEventListener("click", () => {
     stopAnimation();
+    clearTimer();
     gameEnd.classList.add("hidden");
     gameWrap.classList.add("hidden");
     playIntro.classList.remove("hidden");
@@ -183,6 +230,7 @@ function showQuestion() {
   });
 
   startAnimation();
+  startTimer();
 }
 
 function startAnimation() {
@@ -228,6 +276,7 @@ function onBubbleClick(bubble) {
 
   if (type === "single") {
     if (bubble.el.dataset.correct === "1") {
+      clearTimer();
       bubbles.forEach(b => { b.locked = true; b.el.classList.add("disabled"); });
       bubble.el.classList.add("correct-pop");
       playCorrect();
@@ -278,6 +327,7 @@ function onBubbleClick(bubble) {
       }
 
       if (isCorrect) {
+        clearTimer();
         bubbles.forEach(b => { b.locked = true; b.el.classList.add("disabled"); });
         slots.forEach(s => s.classList.add("correct-pop"));
         playCorrect();
@@ -317,6 +367,7 @@ function onBubbleClick(bubble) {
 
 function endGame() {
   stopAnimation();
+  clearTimer();
   gameWrap.classList.add("hidden");
   gameEnd.classList.remove("hidden");
   finalScore.textContent = "Điểm số: " + score + "/" + queue.length;

@@ -768,3 +768,18 @@ footer {
   color: var(--text-dim);
   font-size: 12px;
 }
+
+
+/* Timer styles */
+.timer-label {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+.timer-label.warning {
+  background: #ff4757;
+  color: white;
+  animation: pulse 1s infinite;
+}

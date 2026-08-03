@@ -1,11 +1,11 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { firebaseConfig } from "./config.js";
 import { uid } from "./utils.js";
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const dataDocRef = doc(db, "catchword", "gamedata");
+const db = getDatabase(app);
+const dataDocRef = ref(db, "catchword/gamedata");
 
 export let screens = [];
 export let questions = [];
@@ -17,16 +17,16 @@ export function onDataUpdate(cb) {
 }
 
 export function saveData() {
-  setDoc(dataDocRef, { screens: screens, questions: questions })
+  set(dataDocRef, { screens: screens, questions: questions })
     .catch(function(err) {
       console.error("Lỗi khi lưu lên Firebase:", err);
       alert("Không thể lưu. Xem console để biết chi tiết.");
     });
 }
 
-onSnapshot(dataDocRef, function(docSnap) {
-  if (docSnap.exists()) {
-    let data = docSnap.data();
+onValue(dataDocRef, function(snapshot) {
+  if (snapshot.exists()) {
+    let data = snapshot.val();
     screens = (data.screens || []).sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
     questions = data.questions || [];
   } else {

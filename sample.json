@@ -1,0 +1,100 @@
+{
+  "screens": [
+    {
+      "id": "screen_1",
+      "name": "Màn 1: Động vật",
+      "order": 0
+    },
+    {
+      "id": "screen_2",
+      "name": "Màn 2: Đồ vật",
+      "order": 1
+    }
+  ],
+  "questions": [
+    {
+      "id": "q_1",
+      "screenId": "screen_1",
+      "word": "Dog",
+      "type": "single",
+      "answers": [
+        { "text": "Con chó", "correct": true },
+        { "text": "Con mèo", "correct": false },
+        { "text": "Con chim", "correct": false },
+        { "text": "Con cá", "correct": false }
+      ]
+    },
+    {
+      "id": "q_2",
+      "screenId": "screen_1",
+      "word": "Cat",
+      "type": "single",
+      "answers": [
+        { "text": "Con mèo", "correct": true },
+        { "text": "Con lợn", "correct": false },
+        { "text": "Con gà", "correct": false },
+        { "text": "Con bò", "correct": false }
+      ]
+    },
+    {
+      "id": "q_3",
+      "screenId": "screen_1",
+      "word": "Elephant",
+      "type": "single",
+      "answers": [
+        { "text": "Con voi", "correct": true },
+        { "text": "Con kiến", "correct": false },
+        { "text": "Con thỏ", "correct": false },
+        { "text": "Con hổ", "correct": false }
+      ]
+    },
+    {
+      "id": "q_4",
+      "screenId": "screen_2",
+      "word": "Book",
+      "type": "single",
+      "answers": [
+        { "text": "Quyển sách", "correct": true },
+        { "text": "Cái bút", "correct": false },
+        { "text": "Cái thước", "correct": false },
+        { "text": "Cục tẩy", "correct": false }
+      ]
+    },
+    {
+      "id": "q_5",
+      "screenId": "screen_2",
+      "word": "Pen",
+      "type": "single",
+      "answers": [
+        { "text": "Cái bút", "correct": true },
+        { "text": "Quyển vở", "correct": false },
+        { "text": "Balo", "correct": false },
+        { "text": "Bàn học", "correct": false }
+      ]
+    },
+    {
+      "id": "q_6",
+      "screenId": "screen_2",
+      "word": "Table",
+      "type": "single",
+      "answers": [
+        { "text": "Cái bàn", "correct": true },
+        { "text": "Cái ghế", "correct": false },
+        { "text": "Cái tủ", "correct": false },
+        { "text": "Cái giường", "correct": false }
+      ]
+    },
+    {
+      "id": "q_7",
+      "screenId": "screen_2",
+      "word": "Chair",
+      "type": "single",
+      "answers": [
+        { "text": "Cái ghế", "correct": true },
+        { "text": "Cái bàn", "correct": false },
+        { "text": "Cái quạt", "correct": false },
+        { "text": "Cái đèn", "correct": false }
+      ]
+    }
+  ]
+}
