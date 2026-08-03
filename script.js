@@ -1,91 +1,86 @@
-(function () {
-  "use strict";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  var STORAGE_KEY = "catchword_data";
-  var LEGACY_KEY = "catchword_questions";
+const firebaseConfig = {
+  // TODO: Thay thế bằng cấu hình Firebase của dự án bạn
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
 
-  /* ============================================================
-     DATA LAYER
-  ============================================================ */
-  function uid() {
-    return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-  }
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const dataDocRef = doc(db, "catchword", "gamedata");
 
-  function loadData() {
-    try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        var data = JSON.parse(raw);
-        if (data && Array.isArray(data.screens) && Array.isArray(data.questions)) {
-          return data;
-        }
-      }
-    } catch (e) { /* fall through */ }
+var screens = [];
+var questions = [];
 
-    var legacyRaw = localStorage.getItem(LEGACY_KEY);
-    if (legacyRaw) {
-      try {
-        var legacy = JSON.parse(legacyRaw);
-        if (Array.isArray(legacy)) {
-          var defaultScreen = { id: uid(), name: "Màn 1", order: 0 };
-          legacy.forEach(function (q) {
-            if (q && !q.screenId) q.screenId = defaultScreen.id;
-          });
-          var migrated = { screens: [defaultScreen], questions: legacy };
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
-          localStorage.removeItem(LEGACY_KEY);
-          return migrated;
-        }
-      } catch (e2) { /* fall through */ }
-    }
+/* ============================================================
+   DATA LAYER
+============================================================ */
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
 
-    var firstScreen = { id: uid(), name: "Màn 1", order: 0 };
-    return { screens: [firstScreen], questions: [] };
-  }
-
-  function saveData() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ screens: screens, questions: questions }));
-  }
-
-  var data = loadData();
-  var screens = data.screens.sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
-  var questions = data.questions;
-
-  function getScreen(id) {
-    return screens.find(function (s) { return s.id === id; });
-  }
-
-  function questionsForScreen(screenId) {
-    return questions.filter(function (q) { return q.screenId === screenId; });
-  }
-
-  function normalizeQuestions() {
-    ensureDefaultScreen();
-    var changed = false;
-    questions.forEach(function (q) {
-      if (!q.screenId || !getScreen(q.screenId)) {
-        q.screenId = screens[0].id;
-        changed = true;
-      }
+function saveData() {
+  setDoc(dataDocRef, { screens: screens, questions: questions })
+    .catch(function(err) {
+      console.error("Lỗi khi lưu lên Firebase:", err);
+      alert("Không thể lưu. Xem console để biết chi tiết.");
     });
-    if (changed) saveData();
-  }
+}
 
-  function ensureDefaultScreen() {
-    if (screens.length === 0) {
-      screens.push({ id: uid(), name: "Màn 1", order: 0 });
-      saveData();
-    }
+onSnapshot(dataDocRef, function(docSnap) {
+  if (docSnap.exists()) {
+    var data = docSnap.data();
+    screens = (data.screens || []).sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
+    questions = data.questions || [];
+  } else {
+    ensureDefaultScreen();
   }
-
-  function reloadFromStorage() {
-    var fresh = loadData();
-    screens = fresh.screens.sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
-    questions = fresh.questions;
-    normalizeQuestions();
-  }
-
+  
   normalizeQuestions();
+  
+  // Re-render UI upon data updates
+  if (typeof renderScreenList === 'function') renderScreenList();
+  if (typeof renderScreenSelect === 'function') renderScreenSelect();
+  if (typeof renderScreenPicker === 'function') renderScreenPicker();
+  if (typeof renderQuestionList === 'function') renderQuestionList();
+});
+
+function getScreen(id) {
+  return screens.find(function (s) { return s.id === id; });
+}
+
+function questionsForScreen(screenId) {
+  return questions.filter(function (q) { return q.screenId === screenId; });
+}
+
+function normalizeQuestions() {
+  if (screens.length === 0) return;
+  var changed = false;
+  questions.forEach(function (q) {
+    if (!q.screenId || !getScreen(q.screenId)) {
+      q.screenId = screens[0].id;
+      changed = true;
+    }
+  });
+  if (changed) saveData();
+}
+
+function ensureDefaultScreen() {
+  if (screens.length === 0) {
+    screens.push({ id: uid(), name: "Màn 1", order: 0 });
+    saveData();
+  }
+}
+
+function reloadFromStorage() {
+  // Được quản lý tự động bởi Firebase onSnapshot
+}
 
   /* ============================================================
      SOUND EFFECTS (Web Audio API — no external files needed)
@@ -969,4 +964,4 @@
     finalScore.textContent = "Điểm số: " + score + "/" + queue.length;
   }
 
-})();
+
