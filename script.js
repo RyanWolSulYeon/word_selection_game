@@ -316,6 +316,12 @@
   var btnAddAnswer = document.getElementById("btn-add-answer");
   var btnSaveQuestion = document.getElementById("btn-save-question");
   var formError = document.getElementById("form-error");
+  var inputType = document.getElementById("input-type");
+  var labelInputWord = document.getElementById("label-input-word");
+  var hintInputWord = document.getElementById("hint-input-word");
+  var sentenceInputWrap = document.getElementById("sentence-input-wrap");
+  var inputSentence = document.getElementById("input-sentence");
+  var labelAnswers = document.getElementById("label-answers");
   var questionListEl = document.getElementById("question-list");
   var qCountEl = document.getElementById("q-count");
   var emptyListMsg = document.getElementById("empty-list-msg");
@@ -329,9 +335,15 @@
       '<input type="text" class="answer-text" placeholder="Nhập đáp án">' +
       '<button type="button" class="remove-answer" title="Xóa đáp án">&times;</button>';
     row.querySelector(".answer-text").value = text || "";
-    row.querySelector(".correct-radio").checked = !!correct;
+    var radio = row.querySelector(".correct-radio");
+    radio.checked = !!correct;
+    if (inputType.value === "sentence") {
+      radio.style.display = "none";
+    } else if (inputType.value !== "single") {
+      radio.type = "checkbox";
+    }
     row.querySelector(".remove-answer").addEventListener("click", function () {
-      if (answersList.children.length > 2) {
+      if (answersList.children.length > 1) {
         row.remove();
       }
     });
@@ -340,7 +352,10 @@
 
   function resetForm() {
     editingId = null;
+    inputType.value = "single";
+    updateFormLabels();
     inputWord.value = "";
+    inputSentence.value = "";
     answersList.innerHTML = "";
     answersList.appendChild(makeAnswerRow("", true));
     answersList.appendChild(makeAnswerRow("", false));
@@ -348,31 +363,118 @@
     btnSaveQuestion.textContent = "Lưu câu hỏi";
   }
 
+  function updateFormLabels() {
+    var type = inputType.value;
+    if (type === "single") {
+      labelInputWord.classList.remove("hidden");
+      inputWord.classList.remove("hidden");
+      labelInputWord.textContent = "Từ / nghĩa cần hỏi";
+      hintInputWord.classList.add("hidden");
+      sentenceInputWrap.classList.add("hidden");
+      labelAnswers.textContent = "Các đáp án (chọn nút tròn cho đáp án đúng)";
+      document.querySelectorAll(".correct-radio").forEach(function(r) { r.type = "radio"; r.style.display = ""; });
+    } else if (type === "sequence") {
+      labelInputWord.classList.remove("hidden");
+      inputWord.classList.remove("hidden");
+      labelInputWord.textContent = "Câu hỏi / Yêu cầu";
+      hintInputWord.classList.add("hidden");
+      sentenceInputWrap.classList.add("hidden");
+      labelAnswers.textContent = "Các đáp án (chọn nhiều đáp án đúng theo thứ tự từ trên xuống)";
+      document.querySelectorAll(".correct-radio").forEach(function(r) { r.type = "checkbox"; r.style.display = ""; });
+    } else if (type === "sentence") {
+      labelInputWord.classList.add("hidden");
+      inputWord.classList.add("hidden");
+      hintInputWord.classList.add("hidden");
+      sentenceInputWrap.classList.remove("hidden");
+      labelAnswers.textContent = "Các từ nhiễu (không bắt buộc, thêm để tăng độ khó)";
+      document.querySelectorAll(".correct-radio").forEach(function(r) { r.style.display = "none"; r.checked = false; });
+    } else if (type === "fill_blank") {
+      labelInputWord.classList.remove("hidden");
+      inputWord.classList.remove("hidden");
+      labelInputWord.textContent = "Câu hỏi";
+      hintInputWord.classList.remove("hidden");
+      sentenceInputWrap.classList.add("hidden");
+      labelAnswers.textContent = "Các đáp án điền vào chỗ trống (theo thứ tự)";
+      document.querySelectorAll(".correct-radio").forEach(function(r) { r.type = "checkbox"; r.style.display = ""; });
+    }
+  }
+
+  inputType.addEventListener("change", updateFormLabels);
+
   btnAddAnswer.addEventListener("click", function () {
     answersList.appendChild(makeAnswerRow("", false));
   });
 
   btnSaveQuestion.addEventListener("click", function () {
     var word = inputWord.value.trim();
-    var rows = Array.prototype.slice.call(answersList.querySelectorAll(".answer-row"));
-    var answers = rows.map(function (row) {
-      return {
-        text: row.querySelector(".answer-text").value.trim(),
-        correct: row.querySelector(".correct-radio").checked
-      };
-    }).filter(function (a) { return a.text.length > 0; });
+    var type = inputType.value;
+    var answers = [];
 
-    if (!word) {
-      formError.textContent = "Vui lòng nhập từ cần hỏi.";
+    if (type === "sentence") {
+      word = ""; // bypass word input for sentence mode
+    }
+
+    if (type !== "sentence" && !word) {
+      formError.textContent = "Vui lòng nhập từ/nghĩa cần hỏi.";
       return;
     }
-    if (answers.length < 2) {
-      formError.textContent = "Cần ít nhất 2 đáp án có nội dung.";
+
+    if (type === "sentence") {
+      var sentence = inputSentence.value.trim();
+      if (!sentence) {
+        formError.textContent = "Vui lòng nhập câu đáp án để tự động tách từ.";
+        return;
+      }
+      var words = sentence.split(/\s+/);
+      if (words.length < 2) {
+        formError.textContent = "Câu đáp án phải có ít nhất 2 từ.";
+        return;
+      }
+      words.forEach(function(w) {
+        answers.push({ text: w, correct: true });
+      });
+
+      var rows = Array.prototype.slice.call(answersList.querySelectorAll(".answer-row"));
+      rows.forEach(function (row) {
+        var t = row.querySelector(".answer-text").value.trim();
+        if (t) answers.push({ text: t, correct: false });
+      });
+    } else {
+      var rows = Array.prototype.slice.call(answersList.querySelectorAll(".answer-row"));
+      answers = rows.map(function (row) {
+        return {
+          text: row.querySelector(".answer-text").value.trim(),
+          correct: row.querySelector(".correct-radio").checked
+        };
+      }).filter(function (a) { return a.text.length > 0; });
+
+      if (answers.length < 2) {
+        formError.textContent = "Cần ít nhất 2 đáp án có nội dung.";
+        return;
+      }
+    }
+
+    var correctCount = answers.filter(function(a) { return a.correct; }).length;
+
+    if (type === "single" && correctCount !== 1) {
+      formError.textContent = "Chế độ 1 đáp án cần chính xác 1 đáp án đúng.";
       return;
     }
-    if (!answers.some(function (a) { return a.correct; })) {
-      formError.textContent = "Hãy chọn một đáp án đúng.";
+    if ((type === "sequence" || type === "sentence") && correctCount === 0) {
+      formError.textContent = "Chế độ ghép từ/câu cần ít nhất 1 đáp án đúng.";
       return;
+    }
+    if (type === "fill_blank") {
+      var blanksMatch = word.match(/___/g);
+      var blanksCount = blanksMatch ? blanksMatch.length : 0;
+      if (blanksCount === 0) {
+        formError.textContent = "Câu hỏi cần có ít nhất 1 chỗ trống (___).";
+        return;
+      }
+      if (correctCount !== blanksCount) {
+        formError.textContent = "Số lượng đáp án đúng (" + correctCount + ") phải bằng số chỗ trống (" + blanksCount + ").";
+        return;
+      }
     }
 
     formError.textContent = "";
@@ -383,13 +485,15 @@
         questions[idx].word = word;
         questions[idx].answers = answers;
         questions[idx].screenId = inputScreen.value;
+        questions[idx].type = type;
       }
     } else {
       questions.push({
         id: uid(),
         screenId: inputScreen.value,
         word: word,
-        answers: answers
+        answers: answers,
+        type: type
       });
     }
 
@@ -406,49 +510,79 @@
     qCountEl.textContent = questions.length;
     emptyListMsg.classList.toggle("hidden", questions.length > 0);
 
-    questions.forEach(function (q) {
-      var li = document.createElement("li");
-      li.className = "question-item";
-      var screen = getScreen(q.screenId);
-      var screenName = screen ? screen.name : "Chưa phân màn";
+    screens.forEach(function (s) {
+      var screenQs = questionsForScreen(s.id);
+      if (screenQs.length === 0) return;
 
-      var answersHtml = q.answers.map(function (a) {
-        return a.correct
-          ? '<span class="right">' + escapeHtml(a.text) + " ✓</span>"
-          : escapeHtml(a.text);
-      }).join(" · ");
+      var headerLi = document.createElement("li");
+      headerLi.className = "q-group-header";
+      headerLi.textContent = s.name + " (" + screenQs.length + " câu)";
+      questionListEl.appendChild(headerLi);
 
-      li.innerHTML =
-        '<p class="q-screen">' + escapeHtml(screenName) + '</p>' +
-        '<p class="q-word">' + escapeHtml(q.word) + '</p>' +
-        '<p class="q-answers">' + answersHtml + '</p>' +
-        '<div class="q-actions">' +
-          '<button type="button" data-action="edit">Sửa</button>' +
-          '<button type="button" data-action="delete">Xóa</button>' +
-        '</div>';
+      screenQs.forEach(function (q) {
+        var li = document.createElement("li");
+        li.className = "question-item";
+        
+        var answersHtml = q.answers.map(function (a) {
+          return a.correct
+            ? '<span class="right">' + escapeHtml(a.text) + " ✓</span>"
+            : escapeHtml(a.text);
+        }).join(" · ");
 
-      li.querySelector('[data-action="edit"]').addEventListener("click", function () {
-        editingId = q.id;
-        inputWord.value = q.word;
-        if (q.screenId) inputScreen.value = q.screenId;
-        answersList.innerHTML = "";
-        q.answers.forEach(function (a) {
-          answersList.appendChild(makeAnswerRow(a.text, a.correct));
+        var typeText = q.type === "sequence" ? "Ghép từ" : (q.type === "fill_blank" ? "Điền từ" : (q.type === "sentence" ? "Ghép câu" : "1 đáp án"));
+        var displayWord = q.type === "sentence" ? q.answers.filter(function(a){return a.correct;}).map(function(a){return a.text;}).join(" ") : q.word;
+
+        li.innerHTML =
+          '<p class="q-word">' + escapeHtml(displayWord) + '<span class="q-type-badge">' + typeText + '</span></p>' +
+          '<p class="q-answers">' + answersHtml + '</p>' +
+          '<div class="q-actions">' +
+            '<button type="button" data-action="edit">Sửa</button>' +
+            '<button type="button" data-action="delete">Xóa</button>' +
+          '</div>';
+
+        li.querySelector('[data-action="edit"]').addEventListener("click", function () {
+          editingId = q.id;
+          inputWord.value = q.word;
+          inputType.value = q.type || "single";
+          
+          if (q.screenId) inputScreen.value = q.screenId;
+          
+          answersList.innerHTML = "";
+          
+          if (q.type === "sentence") {
+            var correctAnswers = q.answers.filter(function(a) { return a.correct; });
+            var wrongAnswers = q.answers.filter(function(a) { return !a.correct; });
+            inputSentence.value = correctAnswers.map(function(a) { return a.text; }).join(" ");
+            
+            wrongAnswers.forEach(function (a) {
+              answersList.appendChild(makeAnswerRow(a.text, false));
+            });
+            if (wrongAnswers.length === 0) {
+              answersList.appendChild(makeAnswerRow("", false));
+            }
+          } else {
+            inputSentence.value = "";
+            q.answers.forEach(function (a) {
+              answersList.appendChild(makeAnswerRow(a.text, a.correct));
+            });
+          }
+          
+          updateFormLabels();
+          btnSaveQuestion.textContent = "Cập nhật câu hỏi";
+          window.scrollTo({ top: 0, behavior: "smooth" });
         });
-        btnSaveQuestion.textContent = "Cập nhật câu hỏi";
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      });
 
-      li.querySelector('[data-action="delete"]').addEventListener("click", function () {
-        questions = questions.filter(function (item) { return item.id !== q.id; });
-        saveData();
-        renderScreenList();
-        renderScreenSelect();
-        renderScreenPicker();
-        renderQuestionList();
-      });
+        li.querySelector('[data-action="delete"]').addEventListener("click", function () {
+          questions = questions.filter(function (item) { return item.id !== q.id; });
+          saveData();
+          renderScreenList();
+          renderScreenSelect();
+          renderScreenPicker();
+          renderQuestionList();
+        });
 
-      questionListEl.appendChild(li);
+        questionListEl.appendChild(li);
+      });
     });
   }
 
@@ -525,12 +659,6 @@
     reader.readAsText(file);
   });
 
-  resetForm();
-  renderScreenList();
-  renderScreenSelect();
-  renderScreenPicker();
-  renderQuestionList();
-
   /* ============================================================
      PLAY TAB — game engine
   ============================================================ */
@@ -556,6 +684,13 @@
   var currentScreenId = null;
   var rafId = null;
   var bubbles = []; // {el, x, y, vx, vy, w, h, locked}
+  var currentFilled = [];
+
+  resetForm();
+  renderScreenList();
+  renderScreenSelect();
+  renderScreenPicker();
+  renderQuestionList();
 
   btnStart.addEventListener("click", function () {
     renderScreenPicker();
@@ -616,7 +751,32 @@
     feedbackBanner.className = "feedback-banner";
 
     var q = queue[qIndex];
-    wordDisplay.textContent = q.word;
+    var type = q.type || "single";
+    var wordLabel = document.querySelector(".word-label");
+    
+    if (type === "sentence") {
+      wordLabel.style.display = "none";
+      wordDisplay.style.display = "none";
+    } else {
+      wordLabel.style.display = "";
+      wordDisplay.style.display = "";
+      if (type === "fill_blank") {
+        wordDisplay.innerHTML = escapeHtml(q.word).replace(/___/g, '<span class="blank-slot"></span>');
+      } else {
+        wordDisplay.textContent = q.word;
+      }
+    }
+
+    var sequenceSlots = document.getElementById("sequence-slots");
+    if (type === "sequence" || type === "sentence") {
+      var correctCount = q.answers.filter(function(a) { return a.correct; }).length;
+      sequenceSlots.innerHTML = Array(correctCount).fill('<span class="seq-slot"></span>').join('');
+    } else {
+      sequenceSlots.innerHTML = "";
+    }
+    
+    currentFilled = [];
+
     progressLabel.textContent = "Câu " + (qIndex + 1) + "/" + queue.length;
     scoreLabel.textContent = "Điểm: " + score;
 
@@ -696,38 +856,109 @@
   function onBubbleClick(bubble) {
     if (bubble.locked) return;
 
-    if (bubble.el.dataset.correct === "1") {
-      bubbles.forEach(function (b) { b.locked = true; b.el.classList.add("disabled"); });
-      bubble.el.classList.add("correct-pop");
-      playCorrect();
-      score += 1;
-      feedbackBanner.textContent = "Chính xác! ✨";
-      feedbackBanner.className = "feedback-banner ok";
-      scoreLabel.textContent = "Điểm: " + score;
+    var q = queue[qIndex];
+    var type = q.type || "single";
 
-      setTimeout(function () {
-        qIndex += 1;
-        if (qIndex >= queue.length) {
-          endGame();
-        } else {
-          showQuestion();
-        }
-      }, 850);
+    if (type === "single") {
+      if (bubble.el.dataset.correct === "1") {
+        bubbles.forEach(function (b) { b.locked = true; b.el.classList.add("disabled"); });
+        bubble.el.classList.add("correct-pop");
+        playCorrect();
+        score += 1;
+        feedbackBanner.textContent = "Chính xác! ✨";
+        feedbackBanner.className = "feedback-banner ok";
+        scoreLabel.textContent = "Điểm: " + score;
+
+        setTimeout(function () {
+          qIndex += 1;
+          if (qIndex >= queue.length) {
+            endGame();
+          } else {
+            showQuestion();
+          }
+        }, 850);
+      } else {
+        playWrong();
+
+        bubble.locked = true;
+        bubble.el.classList.add("bubble-remove");
+        bubble.el.style.opacity = "0";
+        bubble.el.style.filter = "blur(1px)";
+        bubble.el.style.pointerEvents = "none";
+
+        bubbles = bubbles.filter(function (b) {
+          return b !== bubble;
+        });
+
+        feedbackBanner.textContent = "Chưa đúng, đáp án này đã bị xóa. Thử lại nhé!";
+        feedbackBanner.className = "feedback-banner bad";
+      }
     } else {
-      playWrong();
-
+      // sequence or fill_blank
       bubble.locked = true;
-      bubble.el.classList.add("bubble-remove");
-      bubble.el.style.opacity = "0";
-      bubble.el.style.filter = "blur(1px)";
-      bubble.el.style.pointerEvents = "none";
+      bubble.el.style.display = "none";
+      
+      currentFilled.push(bubble);
+      
+      var slots = (type === "sequence" || type === "sentence")
+        ? document.querySelectorAll(".seq-slot") 
+        : document.querySelectorAll(".blank-slot");
+      
+      var slotIdx = currentFilled.length - 1;
+      if (slots[slotIdx]) {
+        slots[slotIdx].textContent = bubble.el.textContent;
+        slots[slotIdx].classList.add("filled");
+      }
 
-      bubbles = bubbles.filter(function (b) {
-        return b !== bubble;
-      });
+      var correctAnswers = q.answers.filter(function(a) { return a.correct; });
+      if (currentFilled.length === correctAnswers.length) {
+        // Validate
+        var isCorrect = true;
+        for (var i = 0; i < correctAnswers.length; i++) {
+          if (currentFilled[i].el.textContent !== correctAnswers[i].text) {
+            isCorrect = false;
+            break;
+          }
+        }
 
-      feedbackBanner.textContent = "Chưa đúng, đáp án này đã bị xóa. Thử lại nhé!";
-      feedbackBanner.className = "feedback-banner bad";
+        if (isCorrect) {
+          bubbles.forEach(function (b) { b.locked = true; b.el.classList.add("disabled"); });
+          slots.forEach(function(s) { s.classList.add("correct-pop"); });
+          playCorrect();
+          score += 1;
+          feedbackBanner.textContent = "Hoàn thành xuất sắc! ✨";
+          feedbackBanner.className = "feedback-banner ok";
+          scoreLabel.textContent = "Điểm: " + score;
+
+          setTimeout(function () {
+            qIndex += 1;
+            if (qIndex >= queue.length) {
+              endGame();
+            } else {
+              showQuestion();
+            }
+          }, 1200);
+        } else {
+          playWrong();
+          slots.forEach(function(s) { s.classList.add("wrong"); });
+          feedbackBanner.textContent = "Chưa chính xác! Thử lại nhé.";
+          feedbackBanner.className = "feedback-banner bad";
+          
+          setTimeout(function () {
+            slots.forEach(function(s) { 
+              s.textContent = ""; 
+              s.classList.remove("filled", "wrong"); 
+            });
+            currentFilled.forEach(function(b) {
+              b.locked = false;
+              b.el.style.display = "";
+            });
+            currentFilled = [];
+            feedbackBanner.textContent = "";
+            feedbackBanner.className = "feedback-banner";
+          }, 800);
+        }
+      }
     }
   }
 

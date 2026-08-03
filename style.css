@@ -397,6 +397,73 @@ main {
   font-weight: 800;
   font-size: clamp(24px, 5vw, 36px);
   margin: 0;
+  line-height: 1.4;
+}
+
+/* ---------- Slots for new modes ---------- */
+.sequence-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 18px;
+}
+.seq-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  min-width: 60px;
+  min-height: 40px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  border: 2px dashed var(--line);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+.seq-slot.filled {
+  border-style: solid;
+  border-color: var(--gold);
+  background: linear-gradient(145deg, rgba(255,203,107,.15), rgba(255,203,107,.05));
+  box-shadow: 0 4px 12px rgba(0,0,0,.15);
+}
+.seq-slot.wrong {
+  border-color: var(--coral);
+  background: rgba(255,107,122,.1);
+  animation: shake 0.38s ease;
+}
+
+.blank-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 80px;
+  height: 1.2em;
+  padding: 0 12px;
+  margin: 0 6px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  border: 2px dashed var(--line);
+  vertical-align: middle;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.8em;
+  color: var(--gold);
+  transition: all 0.2s;
+}
+.blank-slot.filled {
+  border-style: solid;
+  border-color: var(--gold);
+  background: rgba(255,203,107,.1);
+}
+.blank-slot.wrong {
+  border-color: var(--coral);
+  background: rgba(255,107,122,.1);
+  color: var(--coral);
+  animation: shake 0.38s ease;
 }
 
 .arena {
@@ -638,6 +705,16 @@ input[type="text"]:focus { border-color: var(--gold); }
   flex-direction: column;
   gap: 10px;
 }
+.q-group-header {
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin: 10px 0 4px;
+  padding-left: 4px;
+}
+.q-group-header:first-child { margin-top: 0; }
 .question-item {
   background: var(--surface-2);
   border: 1px solid var(--line);
@@ -657,6 +734,18 @@ input[type="text"]:focus { border-color: var(--gold); }
   line-height: 1.6;
 }
 .question-item .q-answers .right { color: var(--mint); font-weight: 600; }
+.question-item .q-type-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--gold);
+  margin-left: 8px;
+  vertical-align: middle;
+}
 .question-item .q-actions { display: flex; gap: 8px; }
 .q-actions button {
   font-family: var(--font-body);

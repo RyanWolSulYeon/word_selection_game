@@ -57,6 +57,7 @@
       <div class="word-card">
         <p class="word-label">Nghĩa của từ</p>
         <h2 id="word-display">word</h2>
+        <div id="sequence-slots" class="sequence-slots"></div>
       </div>
 
       <div id="arena" class="arena"></div>
@@ -95,11 +96,25 @@
         <label class="field-label" for="input-screen">Thuộc màn</label>
         <select id="input-screen" class="select-field"></select>
 
-        <label class="field-label" for="input-word">Từ / nghĩa cần hỏi</label>
+        <label class="field-label" for="input-type">Loại câu hỏi</label>
+        <select id="input-type" class="select-field">
+          <option value="single">Chọn 1 đáp án (Mặc định)</option>
+          <option value="sequence">Ghép từ / Chọn nhiều từ (Chế độ 1)</option>
+          <option value="fill_blank">Điền từ vào chỗ trống (Chế độ 2)</option>
+          <option value="sentence">Ghép từ thành câu (Chế độ 3)</option>
+        </select>
+
+        <label class="field-label" id="label-input-word" for="input-word">Từ / nghĩa cần hỏi</label>
         <input id="input-word" type="text" placeholder="Ví dụ: happy — vui vẻ, hạnh phúc">
+        <p id="hint-input-word" class="hint hidden" style="margin-top: 4px; margin-bottom: 12px; font-size: 13px;">Dùng ký hiệu <code>___</code> (3 dấu gạch dưới) để tạo chỗ trống.</p>
+
+        <div id="sentence-input-wrap" class="hidden" style="margin-top: 14px;">
+          <label class="field-label" for="input-sentence">Câu đáp án (sẽ tự động tách thành các từ đúng)</label>
+          <input id="input-sentence" type="text" placeholder="Ví dụ: I love you so much">
+        </div>
 
         <div class="answers-block">
-          <label class="field-label">Các đáp án (chọn nút tròn cho đáp án đúng)</label>
+          <label class="field-label" id="label-answers">Các đáp án (chọn nút tròn cho đáp án đúng)</label>
           <div id="answers-list"></div>
           <button id="btn-add-answer" class="btn-ghost" type="button">+ Thêm đáp án</button>
         </div>
