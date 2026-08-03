@@ -37,12 +37,19 @@
       <p class="eyebrow">Trò chơi chọn nghĩa từ</p>
       <h2>Từ hiện lên, nghĩa đúng trôi lơ lửng.<br>Chạm trúng — đèn sáng. Chạm trật — thử lại.</h2>
       <p class="intro-sub">Mỗi câu hỏi có một từ và nhiều đáp án bay quanh khung chơi. Hãy chạm vào đáp án bạn cho là đúng.</p>
+
+      <div id="screen-picker-wrap" class="screen-picker-wrap">
+        <label class="field-label" for="screen-picker">Chọn màn chơi</label>
+        <div id="screen-picker" class="screen-picker" role="listbox" aria-label="Chọn màn chơi"></div>
+      </div>
+
       <button id="btn-start" class="btn-primary">Bắt đầu chơi</button>
       <p id="no-questions-msg" class="hint hidden">Chưa có câu hỏi nào. Hãy sang tab <strong>Soạn câu hỏi</strong> để tạo trước nhé.</p>
     </div>
 
     <div id="game-wrap" class="game-wrap hidden">
       <div class="game-hud">
+        <span id="screen-label" class="screen-label"></span>
         <span id="progress-label">Câu 1/1</span>
         <span id="score-label">Điểm: 0</span>
       </div>
@@ -61,7 +68,8 @@
       <p class="eyebrow">Hoàn thành</p>
       <h2>Bạn đã bắt xong hết chữ!</h2>
       <p id="final-score" class="intro-sub">Điểm số: 0</p>
-      <button id="btn-replay" class="btn-primary">Chơi lại</button>
+      <button id="btn-replay" class="btn-primary">Chơi lại màn này</button>
+      <button id="btn-back-intro" class="btn-ghost intro-back-btn" type="button">Chọn màn khác</button>
     </div>
 
   </section>
@@ -71,8 +79,22 @@
 
     <div class="manage-grid">
 
+      <div class="card screens-card">
+        <h3>Quản lý màn chơi</h3>
+        <p class="card-desc">Mỗi màn gồm một nhóm câu hỏi. Người chơi chọn màn trước khi bắt đầu.</p>
+        <ul id="screen-list" class="screen-list"></ul>
+        <div class="screen-add-row">
+          <input id="input-screen-name" type="text" placeholder="Tên màn mới (vd: Màn 2 — Động vật)">
+          <button id="btn-add-screen" class="btn-ghost" type="button">+ Thêm màn</button>
+        </div>
+        <p id="screen-error" class="form-error"></p>
+      </div>
+
       <div class="card form-card">
         <h3>Thêm câu hỏi mới</h3>
+        <label class="field-label" for="input-screen">Thuộc màn</label>
+        <select id="input-screen" class="select-field"></select>
+
         <label class="field-label" for="input-word">Từ / nghĩa cần hỏi</label>
         <input id="input-word" type="text" placeholder="Ví dụ: happy — vui vẻ, hạnh phúc">
 
