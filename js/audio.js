@@ -38,3 +38,20 @@ export function playWrong() {
 export function unlockAudio() {
   getCtx();
 }
+
+let bgMusic = null;
+export function playBGM() {
+  if (!bgMusic) {
+    bgMusic = new Audio("geoffreyburch-man-is-he-mega-glbml-22045.mp3");
+    bgMusic.loop = true;
+    bgMusic.volume = 0.2;
+  }
+  bgMusic.play().catch(e => console.log("BGM play error:", e));
+}
+
+export function stopBGM() {
+  if (bgMusic) {
+    bgMusic.pause();
+    bgMusic.currentTime = 0;
+  }
+}

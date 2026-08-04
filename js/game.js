@@ -1,6 +1,6 @@
 import { screens, questionsForScreen } from "./data.js";
 import { shuffle, escapeHtml } from "./utils.js";
-import { playCorrect, playWrong, unlockAudio } from "./audio.js";
+import { playCorrect, playWrong, unlockAudio, playBGM, stopBGM } from "./audio.js";
 
 const screenPickerEl = document.getElementById("screen-picker");
 const playIntro = document.getElementById("play-intro");
@@ -133,6 +133,7 @@ export function initGame() {
   btnBackIntro.addEventListener("click", () => {
     stopAnimation();
     clearTimer();
+    stopBGM();
     gameEnd.classList.add("hidden");
     gameWrap.classList.add("hidden");
     playIntro.classList.remove("hidden");
@@ -146,6 +147,8 @@ function startGame(screenId) {
     noQuestionsMsg.classList.remove("hidden");
     return;
   }
+
+  playBGM();
 
   currentScreenId = screenId;
   const screen = screens.find(s => s.id === screenId);
@@ -368,6 +371,7 @@ function onBubbleClick(bubble) {
 function endGame() {
   stopAnimation();
   clearTimer();
+  stopBGM();
   gameWrap.classList.add("hidden");
   gameEnd.classList.remove("hidden");
   finalScore.textContent = "Điểm số: " + score + "/" + queue.length;
