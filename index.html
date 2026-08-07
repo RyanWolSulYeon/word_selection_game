@@ -53,6 +53,8 @@
         <span id="progress-label">Câu 1/1</span>
         <span id="score-label">Điểm: 0</span>
         <span id="timer-label" class="timer-label">⏳ 30s</span>
+        <button id="btn-pause" class="btn-ghost" style="padding: 4px 8px; font-size: 12px; margin-left: 8px;">⏸ Tạm dừng</button>
+        <button id="btn-exit" class="btn-ghost" style="padding: 4px 8px; font-size: 12px; color: var(--coral); border-color: var(--coral); margin-left: 4px;">❌ Thoát</button>
       </div>
 
       <div class="word-card">
@@ -61,7 +63,13 @@
         <div id="sequence-slots" class="sequence-slots"></div>
       </div>
 
-      <div id="arena" class="arena"></div>
+      <div style="position: relative;">
+        <div id="arena" class="arena"></div>
+        <div id="pause-overlay" class="pause-overlay hidden">
+          <h2>TẠM DỪNG</h2>
+          <button id="btn-resume" class="btn-primary">Tiếp tục</button>
+        </div>
+      </div>
 
       <div id="feedback-banner" class="feedback-banner"></div>
     </div>
@@ -150,6 +158,17 @@
 <footer>
   <p>Dữ liệu câu hỏi được lưu trên đám mây (Firebase Firestore).</p>
 </footer>
+
+<div id="exit-confirm-overlay" class="modal-overlay hidden">
+  <div class="modal-card">
+    <h2>Xác nhận thoát</h2>
+    <p class="intro-sub" style="margin-bottom: 24px; max-width: 100%;">Bạn có chắc chắn muốn thoát màn chơi này không?<br>Tiến trình sẽ bị hủy bỏ.</p>
+    <div class="modal-actions">
+      <button id="btn-cancel-exit" class="btn-ghost">Tiếp tục chơi</button>
+      <button id="btn-confirm-exit" class="btn-primary btn-danger">Thoát ngay</button>
+    </div>
+  </div>
+</div>
 
 <script type="module" src="js/main.js"></script>
 </body>

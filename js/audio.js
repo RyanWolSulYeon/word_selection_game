@@ -55,3 +55,15 @@ export function stopBGM() {
     bgMusic.currentTime = 0;
   }
 }
+
+export function pauseBGM() {
+  if (bgMusic && !bgMusic.paused) {
+    bgMusic.pause();
+  }
+}
+
+export function resumeBGM() {
+  if (bgMusic && bgMusic.paused) {
+    bgMusic.play().catch(e => console.log("BGM play error:", e));
+  }
+}

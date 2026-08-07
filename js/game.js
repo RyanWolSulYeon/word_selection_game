@@ -1,6 +1,6 @@
 import { screens, questionsForScreen } from "./data.js";
 import { shuffle, escapeHtml } from "./utils.js";
-import { playCorrect, playWrong, unlockAudio, playBGM, stopBGM } from "./audio.js";
+import { playCorrect, playWrong, unlockAudio, playBGM, stopBGM, pauseBGM, resumeBGM } from "./audio.js";
 
 const screenPickerEl = document.getElementById("screen-picker");
 const playIntro = document.getElementById("play-intro");
@@ -18,8 +18,17 @@ const finalScore = document.getElementById("final-score");
 const btnReplay = document.getElementById("btn-replay");
 const screenLabel = document.getElementById("screen-label");
 const btnBackIntro = document.getElementById("btn-back-intro");
+const btnPause = document.getElementById("btn-pause");
+const btnResume = document.getElementById("btn-resume");
+const btnExit = document.getElementById("btn-exit");
+const pauseOverlay = document.getElementById("pause-overlay");
+const exitConfirmOverlay = document.getElementById("exit-confirm-overlay");
+const btnConfirmExit = document.getElementById("btn-confirm-exit");
+const btnCancelExit = document.getElementById("btn-cancel-exit");
 
 let selectedPlayScreenId = null;
+let isPaused = false;
+let wasPausedBeforeExit = false;
 let queue = [];
 let qIndex = 0;
 let score = 0;
@@ -48,9 +57,13 @@ function updateTimerDisplay() {
 }
 
 function startTimer() {
-  clearTimer();
   timeLeft = 30;
   updateTimerDisplay();
+  resumeTimer();
+}
+
+function resumeTimer() {
+  clearTimer();
   timerInterval = setInterval(() => {
     timeLeft -= 1;
     updateTimerDisplay();
@@ -130,7 +143,63 @@ export function initGame() {
     if (currentScreenId) startGame(currentScreenId);
   });
 
+  btnPause.addEventListener("click", () => {
+    if (isPaused || gameWrap.classList.contains("hidden") || feedbackBanner.textContent !== "") return;
+    isPaused = true;
+    stopAnimation();
+    clearTimer();
+    pauseBGM();
+    pauseOverlay.classList.remove("hidden");
+  });
+
+  btnResume.addEventListener("click", () => {
+    if (!isPaused) return;
+    isPaused = false;
+    startAnimation();
+    resumeTimer();
+    resumeBGM();
+    pauseOverlay.classList.add("hidden");
+  });
+
+  btnExit.addEventListener("click", () => {
+    if (gameWrap.classList.contains("hidden") || feedbackBanner.textContent !== "") return;
+    
+    wasPausedBeforeExit = isPaused;
+    if (!isPaused) {
+      isPaused = true;
+      stopAnimation();
+      clearTimer();
+      pauseBGM();
+    }
+    exitConfirmOverlay.classList.remove("hidden");
+  });
+
+  btnCancelExit.addEventListener("click", () => {
+    exitConfirmOverlay.classList.add("hidden");
+    if (!wasPausedBeforeExit) {
+      isPaused = false;
+      startAnimation();
+      resumeTimer();
+      resumeBGM();
+    }
+  });
+
+  btnConfirmExit.addEventListener("click", () => {
+    exitConfirmOverlay.classList.add("hidden");
+    isPaused = false;
+    if (pauseOverlay) pauseOverlay.classList.add("hidden");
+    stopAnimation();
+    clearTimer();
+    stopBGM();
+    gameEnd.classList.add("hidden");
+    gameWrap.classList.add("hidden");
+    playIntro.classList.remove("hidden");
+    renderScreenPicker();
+  });
+
   btnBackIntro.addEventListener("click", () => {
+    isPaused = false;
+    if (pauseOverlay) pauseOverlay.classList.add("hidden");
     stopAnimation();
     clearTimer();
     stopBGM();
@@ -272,7 +341,7 @@ function tick(ts) {
 }
 
 function onBubbleClick(bubble) {
-  if (bubble.locked) return;
+  if (bubble.locked || isPaused) return;
 
   const q = queue[qIndex];
   const type = q.type || "single";
@@ -369,6 +438,8 @@ function onBubbleClick(bubble) {
 }
 
 function endGame() {
+  isPaused = false;
+  if (pauseOverlay) pauseOverlay.classList.add("hidden");
   stopAnimation();
   clearTimer();
   stopBGM();
