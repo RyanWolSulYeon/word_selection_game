@@ -240,6 +240,28 @@ function showQuestion() {
   const type = q.type || "single";
   const wordLabel = document.querySelector(".word-label");
   
+  function bindSlotClicks(slotsClass) {
+    const slots = document.querySelectorAll(slotsClass);
+    slots.forEach((slot, index) => {
+      slot.style.cursor = "pointer";
+      slot.addEventListener("click", () => {
+        if (index >= currentFilled.length || isPaused) return;
+        const bubble = currentFilled[index];
+        bubble.locked = false;
+        bubble.el.style.display = "";
+        currentFilled.splice(index, 1);
+        
+        slots.forEach(s => { s.textContent = ""; s.classList.remove("filled"); });
+        currentFilled.forEach((b, i) => {
+          if (slots[i]) {
+            slots[i].textContent = b.el.textContent;
+            slots[i].classList.add("filled");
+          }
+        });
+      });
+    });
+  }
+
   if (type === "sentence") {
     wordLabel.style.display = "none";
     wordDisplay.style.display = "none";
@@ -248,6 +270,7 @@ function showQuestion() {
     wordDisplay.style.display = "";
     if (type === "fill_blank") {
       wordDisplay.innerHTML = escapeHtml(q.word).replace(/___/g, '<span class="blank-slot"></span>');
+      bindSlotClicks(".blank-slot");
     } else {
       wordDisplay.textContent = q.word;
     }
@@ -257,6 +280,7 @@ function showQuestion() {
   if (type === "sequence" || type === "sentence") {
     const correctCount = q.answers.filter(a => a.correct).length;
     sequenceSlots.innerHTML = Array(correctCount).fill('<span class="seq-slot"></span>').join('');
+    bindSlotClicks(".seq-slot");
   } else {
     sequenceSlots.innerHTML = "";
   }
@@ -284,7 +308,7 @@ function showQuestion() {
     const bh = el.offsetHeight || 56;
     let x = Math.random() * Math.max(1, arenaRect.width - bw);
     let y = Math.random() * Math.max(1, arenaRect.height - bh);
-    const speed = 40 + Math.random() * 45;
+    const speed = (40 + Math.random() * 45) * 1.2;
     const angle = Math.random() * Math.PI * 2;
 
     const bubble = {

@@ -40,3 +40,28 @@ onDataUpdate(() => {
 
 initManage();
 initGame();
+
+const btnFullscreen = document.getElementById("btn-fullscreen");
+if (btnFullscreen) {
+  btnFullscreen.addEventListener("click", () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.error(`Lỗi khi mở toàn màn hình: ${err.message}`);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  });
+
+  document.addEventListener("fullscreenchange", () => {
+    if (document.fullscreenElement) {
+      btnFullscreen.innerHTML = "⛶ Thu nhỏ";
+      btnFullscreen.title = "Thu nhỏ";
+    } else {
+      btnFullscreen.innerHTML = "⛶ Toàn màn hình";
+      btnFullscreen.title = "Toàn màn hình";
+    }
+  });
+}
