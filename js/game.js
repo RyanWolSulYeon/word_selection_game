@@ -388,14 +388,17 @@ function onBubbleClick(bubble) {
       }, 850);
     } else {
       playWrong();
-      bubble.locked = true;
-      bubble.el.classList.add("bubble-remove");
-      bubble.el.style.opacity = "0";
-      bubble.el.style.filter = "blur(1px)";
-      bubble.el.style.pointerEvents = "none";
-      bubbles = bubbles.filter(b => b !== bubble);
-      feedbackBanner.textContent = "Chưa đúng, đáp án này đã bị xóa. Thử lại nhé!";
+      clearTimer();
+      bubbles.forEach(b => { b.locked = true; b.el.classList.add("disabled"); });
+      bubble.el.classList.add("wrong-shake");
+      feedbackBanner.textContent = "Chưa chính xác! Chuyển sang câu tiếp theo...";
       feedbackBanner.className = "feedback-banner bad";
+
+      setTimeout(() => {
+        qIndex += 1;
+        if (qIndex >= queue.length) endGame();
+        else showQuestion();
+      }, 1200);
     }
   } else {
     bubble.locked = true;
